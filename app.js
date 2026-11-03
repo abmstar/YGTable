@@ -1,5 +1,4 @@
 'use strict';
-// 배포 전에 실제 Apps Script /exec 주소를 입력하세요.
 const DEFAULT_ENDPOINT = 'https://script.google.com/a/macros/yeogang.hs.kr/s/AKfycby2QhLYn6NmBdGenbNmbu-gugXsbMhwsDtD1j-1z6a-_SF9uuLMXpyc5PhQ99jv0Vjo/exec';
 const PREFIX = 'teacher-timetable.v1.';
 const $ = id => document.getElementById(id);
@@ -45,7 +44,7 @@ function jsonp(url,params){return new Promise((resolve,reject)=>{
  timer=setTimeout(()=>{cleanup();reject(new Error('응답 시간이 초과되었습니다. 잠시 후 다시 시도하세요.'))},25000);
  const u=new URL(url);Object.entries({...params,callback}).forEach(([k,v])=>u.searchParams.set(k,v));script.src=u.href;document.head.append(script);
 })}
-function validEndpoint(value){try{const u=new URL(value);return u.protocol==='https:'&&u.hostname==='script.google.com'&&/^\/macros\/s\/[^/]+\/exec$/.test(u.pathname)&&!u.search&&!u.hash}catch{return false}}
+function validEndpoint(value){try{const u=new URL(value);return u.protocol==='https:'&&u.hostname==='script.google.com'&&/^\/(?:macros\/s|a\/macros\/[^/]+\/s)\/[^/]+\/exec$/.test(u.pathname)&&!u.search&&!u.hash}catch{return false}}
 async function loadWeek(){
  const id=++requestVersion,info=weekInfo(weekOffset);
  $('weekTitle').textContent=`${info.year} · ${info.sheetName}`;
