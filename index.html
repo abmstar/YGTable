@@ -361,6 +361,32 @@
     padding: 2px;
   }
 }
+/* PC 등 넓은 화면에서는 주간 이동 버튼 표시 */
+.nav {
+  display: flex;
+}
+
+/* 화면 너비 768px 이하에서는 숨김 */
+@media (max-width: 768px) {
+  .nav {
+    display: none;
+  }
+}
+/* 주간 배지와 날짜를 같은 줄에 표시 */
+.week-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.week-heading .badge {
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+.week-heading h2 {
+  margin: 0;
+}
 
     </style>
   </head>
@@ -401,11 +427,10 @@
       </form>
 
       <section class="weekbar">
-        <div>
+        <div class="week-heading">
           <span class="badge" id="relative">이번 주</span>
           <h2 id="weekTitle"></h2>
         </div>
-<!--
         <nav class="nav" aria-label="주간 이동">
           <button id="previous" aria-label="이전 주">
             이전
@@ -419,7 +444,6 @@
             다음
           </button>
         </nav>
--->
       </section>
 
       <section
