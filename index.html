@@ -333,6 +333,34 @@
           border-radius: 14px;
         }
       }
+/* 시간표 세로 높이 및 과목명·학급명 줄 간격 축소 */
+.cell {
+  min-height: 64px;
+  padding: 6px 4px;
+  line-height: 1.25;
+  gap: 0;
+}
+
+.cell.head {
+  min-height: 38px;
+  padding: 6px 4px;
+}
+
+/* 휴대전화 */
+@media (max-width: 540px) {
+  .cell {
+    min-height: 58px;
+    padding: 5px 3px;
+    font-size: 11px;
+    line-height: 1.2;
+    gap: 0;
+  }
+
+  .cell.head {
+    min-height: 34px;
+  }
+}
+
     </style>
   </head>
 
