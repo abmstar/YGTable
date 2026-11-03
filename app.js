@@ -1,11 +1,11 @@
 'use strict';
-// 운영자가 배포 전에 공통 주소를 입력할 수 있습니다. 비워 두면 연결 설정에서 입력합니다.
+// 배포 전에 실제 Apps Script /exec 주소를 입력하세요.
 const DEFAULT_ENDPOINT = 'https://script.google.com/a/macros/yeogang.hs.kr/s/AKfycbynCSzhbbBGJprBo73ssyEUWw_hmurxSm1aaC0vs_DkgmsTHCYsOYeStmZJVenlnsqT/exec';
 const PREFIX = 'teacher-timetable.v1.';
 const $ = id => document.getElementById(id);
 const store = {get(k){try{return localStorage.getItem(PREFIX+k)}catch{return null}},set(k,v){try{localStorage.setItem(PREFIX+k,v)}catch{$('status').textContent='기기 저장 공간을 사용할 수 없습니다. 이번 실행에서만 사용할 수 있습니다.'}}};
 let teacher = store.get('teacher') || '';
-let endpoint = store.get('endpoint') || DEFAULT_ENDPOINT;
+const endpoint = DEFAULT_ENDPOINT;
 let weekOffset = 0;
 let requestVersion = 0;
 let installPrompt;
@@ -52,7 +52,7 @@ async function loadWeek(){
  $('relative').textContent=weekOffset===0?'이번 주':weekOffset===-1?'지난주':weekOffset===1?'다음 주':`${Math.abs(weekOffset)}주 ${weekOffset<0?'전':'후'}`;
  $('status').textContent='';
  if(!teacher){renderMessage('교사명을 입력해 주세요','한 번 입력하면 이 기기에 저장됩니다.');return}
- if(!endpoint){renderMessage('시트 연결이 필요합니다','아래 연결 설정에 배포한 웹 앱 주소를 입력해 주세요.');$('settings').open=true;return}
+ if(!validEndpoint(endpoint)){renderMessage('시간표 연결 준비 중입니다','관리자가 app.js의 DEFAULT_ENDPOINT에 웹 앱 주소를 설정해야 합니다.');return}
  const cached=readCache(info);
  if(cached)renderTable(cached,info);else renderMessage('시간표를 불러오는 중입니다',teacher+' 선생님 · '+info.sheetName);
  if(!navigator.onLine){if(cached)$('status').textContent='오프라인 · 저장본 갱신 '+stamp(cached.fetchedAt);else renderMessage('오프라인입니다','이 교사·주간의 저장된 시간표가 없습니다.');return}
@@ -63,14 +63,12 @@ async function loadWeek(){
   if(!Array.isArray(result.schedule)||result.schedule.length!==7||result.schedule.some(row=>!Array.isArray(row)||row.length!==5))throw new Error('응답 데이터 형식을 확인해 주세요.');
   result.fetchedAt=new Date().toISOString();store.set(cacheKey(info),JSON.stringify(result));renderTable(result,info);
   $('status').textContent=`${teacher} 선생님 · 갱신 ${stamp(result.fetchedAt)}${result.matches===0?' · 일치하는 수업이 없습니다. 교사명을 확인하세요.':''}`;
- }catch(error){if(id!==requestVersion)return;if(cached)$('status').textContent=`최신 조회 실패 · 저장본 ${stamp(cached.fetchedAt)} · ${error.message}`;else{renderMessage('시간표를 불러오지 못했습니다',error.message);$('status').textContent='연결 설정과 인터넷 상태를 확인한 후 새로고침하세요.'}}
+ }catch(error){if(id!==requestVersion)return;if(cached)$('status').textContent=`최신 조회 실패 · 저장본 ${stamp(cached.fetchedAt)} · ${error.message}`;else{renderMessage('시간표를 불러오지 못했습니다',error.message);$('status').textContent='인터넷 상태를 확인한 후 새로고침하세요. 문제가 계속되면 관리자에게 문의하세요.'}}
 }
 function move(delta){weekOffset+=delta;loadWeek()}
-$('teacher').value=teacher;$('endpoint').value=endpoint;
+$('teacher').value=teacher;
 $('teacherForm').addEventListener('submit',event=>{event.preventDefault();teacher=$('teacher').value.trim();store.set('teacher',teacher);loadWeek()});
 $('previous').onclick=()=>move(-1);$('next').onclick=()=>move(1);$('thisWeek').onclick=()=>{weekOffset=0;loadWeek()};$('refresh').onclick=loadWeek;
-$('saveEndpoint').onclick=()=>{const value=$('endpoint').value.trim();if(!validEndpoint(value)){alert('https://script.google.com/macros/s/배포ID/exec 형식의 주소를 입력하세요.');return}endpoint=value;store.set('endpoint',endpoint);$('settings').open=false;loadWeek()};
-$('clearCache').onclick=()=>{if(!confirm('이 기기의 교사명, 연결 주소, 저장된 시간표를 삭제할까요?'))return;try{Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).forEach(k=>localStorage.removeItem(k))}catch{}teacher='';endpoint=DEFAULT_ENDPOINT;$('teacher').value='';$('endpoint').value=endpoint;weekOffset=0;loadWeek()};
 let start;
 $('surface').addEventListener('pointerdown',e=>{if(e.isPrimary&&e.button===0)start={x:e.clientX,y:e.clientY,time:Date.now(),id:e.pointerId}});
 $('surface').addEventListener('pointercancel',()=>{start=null});
