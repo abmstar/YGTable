@@ -47,7 +47,7 @@ function jsonp(url,params){return new Promise((resolve,reject)=>{
 function validEndpoint(value){try{const u=new URL(value);return u.protocol==='https:'&&u.hostname==='script.google.com'&&/^\/(?:macros\/s|a\/macros\/[^/]+\/s)\/[^/]+\/exec$/.test(u.pathname)&&!u.search&&!u.hash}catch{return false}}
 async function loadWeek(){
  const id=++requestVersion,info=weekInfo(weekOffset);
- $('weekTitle').textContent=`${info.year} · ${info.sheetName}`;
+ $('weekTitle').textContent = info.sheetName;
  $('relative').textContent=weekOffset===0?'이번 주':weekOffset===-1?'지난주':weekOffset===1?'다음 주':`${Math.abs(weekOffset)}주 ${weekOffset<0?'전':'후'}`;
  $('status').textContent='';
  if(!teacher){renderMessage('교사명을 입력해 주세요','한 번 입력하면 이 기기에 저장됩니다.');return}
