@@ -47,7 +47,7 @@ function jsonp(url,params){return new Promise((resolve,reject)=>{
 function validEndpoint(value){try{const u=new URL(value);return u.protocol==='https:'&&u.hostname==='script.google.com'&&/^\/(?:macros\/s|a\/macros\/[^/]+\/s)\/[^/]+\/exec$/.test(u.pathname)&&!u.search&&!u.hash}catch{return false}}
 async function loadWeek(){
  const id=++requestVersion,info=weekInfo(weekOffset);
- $('weekTitle').textContent = info.sheetName;
+ $('weekTitle').textContent = `${info.year} · ${info.sheetName}`;
  $('relative').textContent=weekOffset===0?'이번 주':weekOffset===-1?'지난주':weekOffset===1?'다음 주':`${Math.abs(weekOffset)}주 ${weekOffset<0?'전':'후'}`;
  $('status').textContent='';
  if(!teacher){renderMessage('교사명을 입력해 주세요','한 번 입력하면 이 기기에 저장됩니다.');return}
@@ -67,7 +67,28 @@ async function loadWeek(){
 function move(delta){weekOffset+=delta;loadWeek()}
 $('teacher').value=teacher;
 $('teacherForm').addEventListener('submit',event=>{event.preventDefault();teacher=$('teacher').value.trim();store.set('teacher',teacher);loadWeek()});
-$('previous').onclick=()=>move(-1);$('next').onclick=()=>move(1);$('thisWeek').onclick=()=>{weekOffset=0;loadWeek()};$('refresh').onclick=loadWeek;
+// 버튼이 화면에 있을 때만 클릭 이벤트를 연결합니다.
+const previousButton = $('previous');
+const nextButton = $('next');
+const thisWeekButton = $('thisWeek');
+
+if (previousButton) {
+  previousButton.onclick = () => move(-1);
+}
+
+if (nextButton) {
+  nextButton.onclick = () => move(1);
+}
+
+if (thisWeekButton) {
+  thisWeekButton.onclick = () => {
+    weekOffset = 0;
+    loadWeek();
+  };
+}
+
+$('refresh').onclick = loadWeek;
+
 let start;
 $('surface').addEventListener('pointerdown',e=>{if(e.isPrimary&&e.button===0)start={x:e.clientX,y:e.clientY,time:Date.now(),id:e.pointerId}});
 $('surface').addEventListener('pointercancel',()=>{start=null});
