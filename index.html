@@ -333,31 +333,32 @@
           border-radius: 14px;
         }
       }
-/* 시간표 세로 높이 및 과목명·학급명 줄 간격 축소 */
+/* 시간표 셀 안쪽 여백과 높이 축소 */
 .cell {
-  min-height: 64px;
-  padding: 6px 4px;
-  line-height: 1.25;
+  min-height: 54px;
+  padding: 2px 3px;
+  line-height: 1.2;
   gap: 0;
 }
 
 .cell.head {
-  min-height: 38px;
-  padding: 6px 4px;
+  min-height: 32px;
+  padding: 2px 3px;
 }
 
 /* 휴대전화 */
 @media (max-width: 540px) {
   .cell {
-    min-height: 58px;
-    padding: 5px 3px;
+    min-height: 48px;
+    padding: 2px;
     font-size: 11px;
-    line-height: 1.2;
+    line-height: 1.15;
     gap: 0;
   }
 
   .cell.head {
-    min-height: 34px;
+    min-height: 30px;
+    padding: 2px;
   }
 }
 
