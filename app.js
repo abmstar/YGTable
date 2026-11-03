@@ -1,6 +1,6 @@
 'use strict';
 // 배포 전에 실제 Apps Script /exec 주소를 입력하세요.
-const DEFAULT_ENDPOINT = 'https://script.google.com/a/macros/yeogang.hs.kr/s/AKfycbynCSzhbbBGJprBo73ssyEUWw_hmurxSm1aaC0vs_DkgmsTHCYsOYeStmZJVenlnsqT/exec';
+const DEFAULT_ENDPOINT = 'https://script.google.com/a/macros/yeogang.hs.kr/s/AKfycby2QhLYn6NmBdGenbNmbu-gugXsbMhwsDtD1j-1z6a-_SF9uuLMXpyc5PhQ99jv0Vjo/exec';
 const PREFIX = 'teacher-timetable.v1.';
 const $ = id => document.getElementById(id);
 const store = {get(k){try{return localStorage.getItem(PREFIX+k)}catch{return null}},set(k,v){try{localStorage.setItem(PREFIX+k,v)}catch{$('status').textContent='기기 저장 공간을 사용할 수 없습니다. 이번 실행에서만 사용할 수 있습니다.'}}};
