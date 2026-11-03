@@ -1,6 +1,6 @@
 'use strict';
 // 운영자가 배포 전에 공통 주소를 입력할 수 있습니다. 비워 두면 연결 설정에서 입력합니다.
-const DEFAULT_ENDPOINT = '';
+const DEFAULT_ENDPOINT = 'https://script.google.com/a/macros/yeogang.hs.kr/s/AKfycbynCSzhbbBGJprBo73ssyEUWw_hmurxSm1aaC0vs_DkgmsTHCYsOYeStmZJVenlnsqT/exec';
 const PREFIX = 'teacher-timetable.v1.';
 const $ = id => document.getElementById(id);
 const store = {get(k){try{return localStorage.getItem(PREFIX+k)}catch{return null}},set(k,v){try{localStorage.setItem(PREFIX+k,v)}catch{$('status').textContent='기기 저장 공간을 사용할 수 없습니다. 이번 실행에서만 사용할 수 있습니다.'}}};
