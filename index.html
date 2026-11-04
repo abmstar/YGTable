@@ -7,6 +7,7 @@
       name="viewport"
       content="width=device-width,initial-scale=1,viewport-fit=cover"
     >
+
     <meta name="theme-color" content="#245b4a">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
@@ -71,17 +72,32 @@
         cursor: default;
       }
 
+      input {
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px;
+        background: white;
+        color: var(--ink);
+      }
+
       .shell {
         max-width: 1050px;
         margin: auto;
         padding: 30px 18px 40px;
       }
 
+      /* 상단 제목 및 설치 버튼 */
       .top {
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 12px;
+      }
+
+      .header-content {
+        flex: 1;
+        min-width: 0;
       }
 
       .eyebrow {
@@ -91,9 +107,21 @@
         font-weight: 750;
       }
 
+      /* 제목 오른쪽에 문구를 배치하고 아래쪽 정렬 */
+      .title-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        margin-top: 7px;
+      }
+
       h1 {
         font-size: 28px;
         margin: 7px 0;
+      }
+
+      .title-row h1 {
+        margin: 0;
       }
 
       p {
@@ -106,6 +134,14 @@
         margin: 0;
       }
 
+      .title-row .tagline {
+        margin: 0;
+        padding-bottom: 3px;
+        line-height: 1.3;
+        word-break: keep-all;
+      }
+
+      /* 교사명 입력 및 조회 */
       .controls {
         display: flex;
         gap: 8px;
@@ -117,19 +153,11 @@
         flex: 1;
       }
 
-      input {
-        min-width: 0;
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        padding: 12px;
-        background: white;
-        color: var(--ink);
-      }
-
       .teacher-input {
         width: 180px;
       }
 
+      /* 주간 제목 */
       .weekbar {
         display: flex;
         justify-content: space-between;
@@ -138,26 +166,38 @@
         margin: 22px 0 14px;
       }
 
+      .week-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
       .weekbar h2 {
         font-size: 23px;
         margin: 0;
       }
 
       .badge {
+        display: inline-block;
         font-size: 12px;
         color: var(--green);
         background: #e0ede4;
         border-radius: 30px;
         padding: 6px 10px;
-        display: inline-block;
-        margin-bottom: 8px;
       }
 
+      .week-heading .badge {
+        margin-bottom: 0;
+        flex-shrink: 0;
+      }
+
+      /* PC 주간 이동 버튼 */
       .nav {
         display: flex;
         gap: 7px;
       }
 
+      /* 시간표 */
       .panel {
         background: #fff;
         border: 1px solid var(--line);
@@ -173,8 +213,8 @@
       }
 
       .cell {
-        min-height: 94px;
-        padding: 10px 6px;
+        min-height: 54px;
+        padding: 2px 3px;
         border-right: 1px solid #e7ece7;
         border-bottom: 1px solid #e7ece7;
         white-space: pre-wrap;
@@ -185,7 +225,8 @@
         justify-content: center;
         flex-direction: column;
         font-size: 14px;
-        line-height: 1.55;
+        line-height: 1.2;
+        gap: 0;
       }
 
       .cell:nth-child(6n) {
@@ -193,7 +234,8 @@
       }
 
       .cell.head {
-        min-height: 48px;
+        min-height: 32px;
+        padding: 2px 3px;
         font-weight: 700;
         background: #f7f9f5;
       }
@@ -217,6 +259,7 @@
         color: #c3cec6;
       }
 
+      /* 조회 안내 */
       .notice {
         padding: 34px 22px;
         text-align: center;
@@ -245,27 +288,6 @@
         margin-top: 18px;
       }
 
-      .settings {
-        background: white;
-        border: 1px solid var(--line);
-        border-radius: 16px;
-        padding: 18px;
-        margin-top: 20px;
-      }
-
-      .settings p {
-        font-size: 13px;
-        color: var(--muted);
-      }
-
-      .settings input {
-        width: 100%;
-      }
-
-      .settings button {
-        margin-top: 12px;
-      }
-
       .privacy {
         font-size: 12px;
         color: var(--muted);
@@ -273,15 +295,20 @@
         margin-top: 24px;
       }
 
-      details summary {
-        cursor: pointer;
-        font-weight: 650;
-      }
-
+      /* 설치 가능한 경우 app.js에서 표시 */
       #install {
         display: none;
+        flex-shrink: 0;
       }
 
+      /* 작은 화면에서는 주간 이동 버튼 숨김 */
+      @media (max-width: 768px) {
+        .nav {
+          display: none;
+        }
+      }
+
+      /* 휴대전화 */
       @media (max-width: 540px) {
         .shell {
           padding: 22px 10px;
@@ -295,14 +322,29 @@
           align-items: flex-start;
         }
 
+        .title-row {
+          gap: 8px;
+        }
+
+        .title-row .tagline {
+          font-size: 11px;
+          padding-bottom: 2px;
+        }
+
         .teacher-input {
           width: 145px;
         }
 
         .cell {
+          min-height: 48px;
+          padding: 2px;
           font-size: 11px;
-          min-height: 86px;
-          padding: 8px 3px;
+          line-height: 1.15;
+        }
+
+        .cell.head {
+          min-height: 30px;
+          padding: 2px;
         }
 
         .table {
@@ -317,10 +359,6 @@
           font-size: 20px;
         }
 
-        .nav button {
-          padding: 10px;
-        }
-
         .controls {
           gap: 6px;
         }
@@ -333,78 +371,26 @@
           border-radius: 14px;
         }
       }
-/* 시간표 셀 안쪽 여백과 높이 축소 */
-.cell {
-  min-height: 54px;
-  padding: 2px 3px;
-  line-height: 1.2;
-  gap: 0;
-}
-
-.cell.head {
-  min-height: 32px;
-  padding: 2px 3px;
-}
-
-/* 휴대전화 */
-@media (max-width: 540px) {
-  .cell {
-    min-height: 48px;
-    padding: 2px;
-    font-size: 11px;
-    line-height: 1.15;
-    gap: 0;
-  }
-
-  .cell.head {
-    min-height: 30px;
-    padding: 2px;
-  }
-}
-/* PC 등 넓은 화면에서는 주간 이동 버튼 표시 */
-.nav {
-  display: flex;
-}
-
-/* 화면 너비 768px 이하에서는 숨김 */
-@media (max-width: 768px) {
-  .nav {
-    display: none;
-  }
-}
-/* 주간 배지와 날짜를 같은 줄에 표시 */
-.week-heading {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.week-heading .badge {
-  margin-bottom: 0;
-  flex-shrink: 0;
-}
-
-.week-heading h2 {
-  margin: 0;
-}
-
     </style>
   </head>
 
   <body>
     <main class="shell">
       <header class="top">
-        <div>
+        <div class="header-content">
           <div class="eyebrow">YG Teacher / TIMETABLE</div>
-          <h1>여강고 선생님 시간표</h1>
-          <p class="sub">사랑을 담은 수업..</p>
+
+          <div class="title-row">
+            <h1>여강고 선생님 시간표</h1>
+            <p class="sub tagline">사랑을 담은 수업</p>
+          </div>
         </div>
 
         <button id="install">앱 설치</button>
       </header>
 
       <form id="teacherForm" class="controls">
-        <label class="sr" for="teacher" hidden>교사명</label>
+        <label for="teacher" hidden>교사명</label>
 
         <input
           id="teacher"
@@ -421,7 +407,12 @@
 
         <span class="grow"></span>
 
-        <button type="button" id="refresh">
+        <button
+          type="button"
+          id="refresh"
+          aria-label="시간표 새로고침"
+          title="시간표 새로고침"
+        >
           🔃
         </button>
       </form>
@@ -431,12 +422,13 @@
           <span class="badge" id="relative">이번 주</span>
           <h2 id="weekTitle"></h2>
         </div>
+
         <nav class="nav" aria-label="주간 이동">
           <button id="previous" aria-label="이전 주">
             이전
           </button>
 
-          <button id="thisWeek">
+          <button id="thisWeek" aria-label="이번 주로 이동">
             오늘
           </button>
 
@@ -466,10 +458,10 @@
       </div>
 
       <footer class="privacy">
-        시간표는 실시간으로 반영됩니다.
+        시간표는 조회 시 원본 시트의 내용을 반영합니다.
         오프라인에서는 마지막 저장본이 표시되므로 변경 여부와 갱신 시각을 확인하세요.
-        교사명은 개별 저장되며 로그인이나 인증이 필요 없습니다.
-        수정요청은 안병무에게 연락주세요.
+        교사명은 이 기기에 저장되며 로그인이나 인증이 필요 없습니다.
+        수정 요청은 안병무에게 연락 주세요.
       </footer>
     </main>
 
