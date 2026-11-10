@@ -90,7 +90,13 @@ async function loadWeek(){
     }
     if(!validSchedule(result))throw new Error('응답 데이터 형식을 확인해 주세요.');
     result.fetchedAt=new Date().toISOString();store.set(cacheKey(info),JSON.stringify(result));renderTable(result,info);
-    $('status').textContent=`${teacher} 선생님 · 온라인 조회 ${stamp(result.fetchedAt)} · ${response.method} · ${APP_VERSION}`+(result.matches===0?' · 일치하는 수업이 없습니다.':'');
+// 기존 코드: 요청 방식과 앱 버전까지 표시 — 확인 완료 후 주석 처리
+// $('status').textContent =
+//   `${teacher} 선생님 · 온라인 조회 ${stamp(result.fetchedAt)} · ${response.method} · ${APP_VERSION}` +
+//   (result.matches === 0 ? ' · 일치하는 수업이 없습니다.' : '');
+// 수정 코드: 교사명과 갱신 시각만 표시
+$('status').textContent = `${teacher} 선생님 · 갱신 ${stamp(result.fetchedAt)}` + (result.matches === 0 ? ' · 일치하는 수업이 없습니다.' : '');
+
   }catch(error){
     if(id!==requestVersion)return;
     if(cached)$('status').textContent=`최신 조회 실패 · 저장본 ${stamp(cached.fetchedAt)} · ${error.message}`;
