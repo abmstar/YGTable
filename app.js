@@ -27,7 +27,7 @@ function validSchedule(d){return d && Array.isArray(d.schedule) && d.schedule.le
 function readCache(info){try{const d=JSON.parse(store.get(cacheKey(info)));return validSchedule(d)?d:null;}catch{return null;}}
 function renderMessage(title,body){const box=document.createElement('div');box.className='notice';const h=document.createElement('strong'),p=document.createElement('div');h.textContent=title;p.textContent=body;box.append(h,p);$('schedule').replaceChildren(box);}
 function renderTable(data,info){
-  const grid=document.createElement('div');grid.className='table';grid.setAttribute('role','table');grid.setAttribute('aria-label',teacher+' '+info.sheetName+' 時間表');
+  const grid=document.createElement('div');grid.className='table';grid.setAttribute('role','table');grid.setAttribute('aria-label',teacher+' '+info.sheetName+' 시간표');
   const headers=['교시','월','화','수','목','금'];
   for(let r=0;r<8;r++)for(let c=0;c<6;c++){
     const el=document.createElement('div');el.className='cell';el.setAttribute('role',r===0?'columnheader':c===0?'rowheader':'cell');
@@ -90,13 +90,7 @@ async function loadWeek(){
     }
     if(!validSchedule(result))throw new Error('응답 데이터 형식을 확인해 주세요.');
     result.fetchedAt=new Date().toISOString();store.set(cacheKey(info),JSON.stringify(result));renderTable(result,info);
-// 기존 코드: 요청 방식과 앱 버전까지 표시 — 확인 완료 후 주석 처리
-// $('status').textContent =
-//   `${teacher} 선생님 · 온라인 조회 ${stamp(result.fetchedAt)} · ${response.method} · ${APP_VERSION}` +
-//   (result.matches === 0 ? ' · 일치하는 수업이 없습니다.' : '');
-// 수정 코드: 교사명과 갱신 시각만 표시
-$('status').textContent = `${teacher} 선생님 · 갱신 ${stamp(result.fetchedAt)}` + (result.matches === 0 ? ' · 일치하는 수업이 없습니다.' : '');
-
+    $('status').textContent = `${teacher} 선생님 · 갱신 ${stamp(result.fetchedAt)}` + (result.matches === 0 ? ' · 일치하는 수업이 없습니다.' : '');
   }catch(error){
     if(id!==requestVersion)return;
     if(cached)$('status').textContent=`최신 조회 실패 · 저장본 ${stamp(cached.fetchedAt)} · ${error.message}`;
@@ -133,3 +127,61 @@ if(standaloneMedia.addEventListener)standaloneMedia.addEventListener('change',up
 window.addEventListener('pageshow',updateInstallButton);updateInstallButton();
 if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{$('status').textContent+=' · 오프라인 파일 등록 실패';});
 loadWeek();armDateRefresh();
+
+// === 오늘의 중식 연동 (NEIS API) ===
+(function initLunch() {
+  const NEIS_KEY = 'd5af74fa74044241a8cf5f076434d1b4';
+  const ATPT_CODE = 'J10';       // 경기도교육청
+  const SCHUL_CODE = '7530586';  // 여강고등학교
+  const box = document.getElementById('lunchBox');
+  if (!box) return;
+
+  // 한국 시간(KST) 기준 오늘 날짜 YYYYMMDD 생성
+  const p = koreaParts();
+  const ymd = `${p.year}${String(p.month).padStart(2, '0')}${String(p.day).padStart(2, '0')}`;
+  const label = `${p.month}/${p.day}`;
+  const cacheKey = `ygtable_lunch_${ymd}`;
+
+  function render(menuText) {
+    if (!menuText) {
+      box.hidden = true;
+      return;
+    }
+    box.innerHTML = `<strong>🍱 ${label} 중식</strong> ${menuText}`;
+    box.hidden = false;
+  }
+
+  // 1. 오늘 저장된 캐시가 있으면 즉시 표시
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      render(cached);
+      return;
+    }
+  } catch {}
+
+  // 2. 나이스 API 호출
+  const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${NEIS_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_CODE}&SD_SCHUL_CODE=${SCHUL_CODE}&MMEAL_SC_CODE=2&MLSV_YMD=${ymd}`;
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      const rows = data?.mealServiceDietInfo?.[1]?.row;
+      if (!rows || !rows.length) {
+        render('');
+        return;
+      }
+      const cleanMenu = rows[0].DDISH_NM
+        .replace(/<br\s*\/?>/gi, ', ')
+        .replace(/\([0-9.]+\)/g, '')
+        .replace(/\s+/g, ' ')
+        .replace(/\s+,/g, ',')
+        .trim();
+
+      render(cleanMenu);
+      try {
+        localStorage.setItem(cacheKey, cleanMenu);
+      } catch {}
+    })
+    .catch(() => {});
+})();
