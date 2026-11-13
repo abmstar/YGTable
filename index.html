@@ -141,12 +141,24 @@
         word-break: keep-all;
       }
 
-      /* 교사명 입력 및 조회 */
+      /* 교사명 입력, 조회, 새로고침 높이 통일 */
       .controls {
         display: flex;
+        align-items: center;
         gap: 8px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         margin: 24px 0 18px;
+      }
+
+      .controls input,
+      .controls button {
+        height: 40px;
+        padding: 0 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        box-sizing: border-box;
       }
 
       .controls .grow {
@@ -155,6 +167,13 @@
 
       .teacher-input {
         width: 180px;
+        padding: 0 12px;
+      }
+
+      .icon-btn {
+        width: 40px;
+        padding: 0;
+        font-size: 17px;
       }
 
       /* 주간 제목 */
@@ -259,6 +278,27 @@
         color: #c3cec6;
       }
 
+      /* 오늘의 중식 배너 */
+      .lunch-box {
+        margin-top: 10px;
+        padding: 10px 14px;
+        background: #ffffff;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--ink);
+      }
+
+      .lunch-box[hidden] {
+        display: none;
+      }
+
+      .lunch-box strong {
+        color: var(--green);
+        margin-right: 6px;
+      }
+
       /* 조회 안내 */
       .notice {
         padding: 34px 22px;
@@ -331,8 +371,27 @@
           padding-bottom: 2px;
         }
 
+        .controls {
+          gap: 6px;
+          margin: 18px 0 14px;
+        }
+
+        .controls input,
+        .controls button {
+          height: 36px;
+          padding: 0 12px;
+          font-size: 13px;
+        }
+
         .teacher-input {
           width: 145px;
+          padding: 0 10px;
+        }
+
+        .icon-btn {
+          width: 36px;
+          padding: 0;
+          font-size: 16px;
         }
 
         .cell {
@@ -359,16 +418,13 @@
           font-size: 20px;
         }
 
-        .controls {
-          gap: 6px;
-        }
-
-        .controls button {
-          padding: 10px;
-        }
-
         .panel {
           border-radius: 14px;
+        }
+
+        .lunch-box {
+          padding: 9px 12px;
+          font-size: 12px;
         }
       }
     </style>
@@ -407,7 +463,7 @@
 
         <span class="grow"></span>
 
-        <button type="button" id="refresh" aria-label="새로고침" title="새로고침">
+        <button type="button" id="refresh" class="icon-btn" aria-label="새로고침" title="새로고침">
           ↻
         </button>
       </form>
@@ -440,6 +496,9 @@
       >
         <div id="schedule"></div>
       </section>
+
+      <!-- 오늘의 중식 배너 -->
+      <div id="lunchBox" class="lunch-box" hidden></div>
 
       <div
         id="status"
