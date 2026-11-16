@@ -10,11 +10,13 @@ const store = {
 let teacher = store.get('teacher') || '';
 const endpoint = DEFAULT_ENDPOINT;
 let weekOffset=0, requestVersion=0, installPrompt=null, midnightTimer;
+
 function koreaParts(now=new Date()) {
   const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'numeric',day:'numeric'}).formatToParts(now);
   const n=t=>Number(parts.find(x=>x.type===t).value);
   return {year:n('year'),month:n('month'),day:n('day')};
 }
+
 function weekInfo(offset=0,now=new Date()) {
   const p=koreaParts(now),today=new Date(Date.UTC(p.year,p.month-1,p.day));
   const mon=new Date(today);mon.setUTCDate(mon.getUTCDate()-(mon.getUTCDay()+6)%7+offset*7);
@@ -22,10 +24,12 @@ function weekInfo(offset=0,now=new Date()) {
   const fmt=d=>`${d.getUTCMonth()+1}/${d.getUTCDate()}`;
   return {sheetName:`${fmt(mon)}~${fmt(fri)}`,monday:mon.toISOString().slice(0,10),year:mon.getUTCFullYear(),todayIndex:offset===0?(today.getUTCDay()+6)%7:-1};
 }
+
 function cacheKey(info){return 'cache.'+JSON.stringify([endpoint,teacher,info.monday]);}
 function validSchedule(d){return d && Array.isArray(d.schedule) && d.schedule.length===7 && d.schedule.every(r=>Array.isArray(r)&&r.length===5);}
 function readCache(info){try{const d=JSON.parse(store.get(cacheKey(info)));return validSchedule(d)?d:null;}catch{return null;}}
 function renderMessage(title,body){const box=document.createElement('div');box.className='notice';const h=document.createElement('strong'),p=document.createElement('div');h.textContent=title;p.textContent=body;box.append(h,p);$('schedule').replaceChildren(box);}
+
 function renderTable(data,info){
   const grid=document.createElement('div');grid.className='table';grid.setAttribute('role','table');grid.setAttribute('aria-label',teacher+' '+info.sheetName+' 시간표');
   const headers=['교시','월','화','수','목','금'];
@@ -38,8 +42,10 @@ function renderTable(data,info){
   }
   $('schedule').replaceChildren(grid);
 }
+
 function stamp(value){const d=new Date(value);return Number.isNaN(d.getTime())?'시각 미상':new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(d);}
 function requestUrl(params){const u=new URL(endpoint);Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));u.searchParams.set('_ts',String(Date.now()));return u;}
+
 async function fetchJson(params){
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),20000);
   try {
@@ -48,6 +54,7 @@ async function fetchJson(params){
     return await response.json();
   }finally{clearTimeout(timer);}
 }
+
 function jsonp(params){return new Promise((resolve,reject)=>{
   const callback='timetable_cb_'+Date.now()+'_'+Math.floor(Math.random()*1e8);
   const script=document.createElement('script');let timer;
@@ -58,6 +65,7 @@ function jsonp(params){return new Promise((resolve,reject)=>{
   script.referrerPolicy='no-referrer';
   script.src=requestUrl({...params,callback}).href;document.head.append(script);
 });}
+
 async function requestTimetable(params){
   try{return {data:await fetchJson(params),method:'fetch'};}
   catch(fetchError){
@@ -66,7 +74,9 @@ async function requestTimetable(params){
     catch(jsonpError){throw new Error('연결에 실패했습니다. API 직접 접속과 인터넷 상태를 확인하세요. ('+APP_VERSION+' · fetch/JSONP 실패)');}
   }
 }
+
 function validEndpoint(value){try{const u=new URL(value);return u.protocol==='https:'&&u.hostname==='script.google.com'&&/^\/(?:macros\/s|a\/macros\/[^/]+\/s)\/[^/]+\/exec$/.test(u.pathname)&&!u.search&&!u.hash;}catch{return false;}}
+
 async function loadWeek(){
   const id=++requestVersion,info=weekInfo(weekOffset);
   $('weekTitle').textContent=`${info.year} · ${info.sheetName}`;
@@ -97,6 +107,7 @@ async function loadWeek(){
     else{renderMessage('시간표를 불러오지 못했습니다',error.message);$('status').textContent='인터넷 상태를 확인한 후 새로고침하세요.';}
   }
 }
+
 function move(delta){weekOffset+=delta;loadWeek();}
 $('teacher').value=teacher;
 $('teacherForm').addEventListener('submit',event=>{event.preventDefault();teacher=$('teacher').value.trim();store.set('teacher',teacher);loadWeek();});
@@ -104,14 +115,18 @@ if($('previous'))$('previous').onclick=()=>move(-1);
 if($('next'))$('next').onclick=()=>move(1);
 if($('thisWeek'))$('thisWeek').onclick=()=>{weekOffset=0;loadWeek();};
 $('refresh').onclick=()=>loadWeek();
+
+// 주간 시간표 좌우 스와이프 (왼쪽으로 밀면 다음 주, 오른쪽으로 밀면 이전 주)
 let start;
 $('surface').addEventListener('pointerdown',e=>{if(e.isPrimary&&e.button===0)start={x:e.clientX,y:e.clientY,time:Date.now(),id:e.pointerId};});
 $('surface').addEventListener('pointercancel',()=>{start=null;});
-$('surface').addEventListener('pointerup',e=>{if(!start||e.pointerId!==start.id)return;const dx=e.clientX-start.x,dy=e.clientY-start.y,elapsed=Date.now()-start.time;start=null;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.6&&elapsed<1200)move(dx>0?1:-1);});
+$('surface').addEventListener('pointerup',e=>{if(!start||e.pointerId!==start.id)return;const dx=e.clientX-start.x,dy=e.clientY-start.y,elapsed=Date.now()-start.time;start=null;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.6&&elapsed<1200)move(dx<0?1:-1);});
+
 window.addEventListener('online',loadWeek);window.addEventListener('offline',loadWeek);
 function armDateRefresh(){clearTimeout(midnightTimer);const now=new Date(),p=koreaParts(now),next=Date.UTC(p.year,p.month-1,p.day+1)-9*3600000;midnightTimer=setTimeout(()=>{loadWeek();armDateRefresh();},Math.max(1000,next-now.getTime()+1000));}
 let lastDay=JSON.stringify(koreaParts());
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){const day=JSON.stringify(koreaParts());if(day!==lastDay){lastDay=day;loadWeek();}armDateRefresh();}});
+
 const installButton=$('install');
 const isAppleMobile=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const standaloneMedia=window.matchMedia('(display-mode: standalone)');
@@ -128,7 +143,7 @@ window.addEventListener('pageshow',updateInstallButton);updateInstallButton();
 if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{$('status').textContent+=' · 오프라인 파일 등록 실패';});
 loadWeek();armDateRefresh();
 
-// === 오늘의 중식 연동 (NEIS API) ===
+// === 오늘의 중식 연동 (NEIS API + 중식 박스 좌우 스와이프) ===
 (function initLunch() {
   const NEIS_KEY = 'd5af74fa74044241a8cf5f076434d1b4';
   const ATPT_CODE = 'J10';       // 경기도교육청
@@ -136,52 +151,116 @@ loadWeek();armDateRefresh();
   const box = document.getElementById('lunchBox');
   if (!box) return;
 
-  // 한국 시간(KST) 기준 오늘 날짜 YYYYMMDD 생성
-  const p = koreaParts();
-  const ymd = `${p.year}${String(p.month).padStart(2, '0')}${String(p.day).padStart(2, '0')}`;
-  const label = `${p.month}/${p.day}`;
-  const cacheKey = `ygtable_lunch_${ymd}`;
+  let lunchReqId = 0;
+  let lunchOffset = 0;
 
-  function render(menuText) {
-    if (!menuText) {
-      box.hidden = true;
-      return;
+  // 수업일(평일) 기준 날짜 계산
+  function schoolDate(step = 0) {
+    const p = koreaParts();
+    const date = new Date(Date.UTC(p.year, p.month - 1, p.day));
+    while ([0, 6].includes(date.getUTCDay())) date.setUTCDate(date.getUTCDate() + 1);
+    for (let i = 0; i < step; i++) {
+      date.setUTCDate(date.getUTCDate() + 1);
+      while ([0, 6].includes(date.getUTCDay())) date.setUTCDate(date.getUTCDate() + 1);
     }
-    box.innerHTML = `<strong>🍱 ${label} 중식</strong> ${menuText}`;
-    box.hidden = false;
+    return date;
   }
 
-  // 1. 오늘 저장된 캐시가 있으면 즉시 표시
-  try {
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      render(cached);
-      return;
+  function loadLunch(step = 0) {
+    const reqId = ++lunchReqId;
+    const dateObj = schoolDate(step);
+    const year = dateObj.getUTCFullYear();
+    const month = dateObj.getUTCMonth() + 1;
+    const day = dateObj.getUTCDate();
+    const dow = ['일', '월', '화', '수', '목', '금', '토'][dateObj.getUTCDay()];
+
+    const ymd = `${year}${String(month).padStart(2, '0')}${String(day).padStart(2, '0')}`;
+    const label = `${month}/${day}(${dow})`;
+    const cacheKey = `ygtable_lunch_${ymd}`;
+
+    function render(menuText) {
+      if (reqId !== lunchReqId) return;
+      if (!menuText) {
+        box.innerHTML = `<strong>🍱 ${label} 중식</strong> 식단 정보가 없습니다.`;
+      } else {
+        box.innerHTML = `<strong>🍱 ${label} 중식</strong> ${menuText}`;
+      }
+      box.hidden = false;
     }
-  } catch {}
 
-  // 2. 나이스 API 호출
-  const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${NEIS_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_CODE}&SD_SCHUL_CODE=${SCHUL_CODE}&MMEAL_SC_CODE=2&MLSV_YMD=${ymd}`;
-
-  fetch(url)
-    .then(res => res.json())
-    .then(data => {
-      const rows = data?.mealServiceDietInfo?.[1]?.row;
-      if (!rows || !rows.length) {
-        render('');
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        render(cached);
         return;
       }
-      const cleanMenu = rows[0].DDISH_NM
-        .replace(/<br\s*\/?>/gi, ', ')
-        .replace(/\([0-9.]+\)/g, '')
-        .replace(/\s+/g, ' ')
-        .replace(/\s+,/g, ',')
-        .trim();
+    } catch {}
 
-      render(cleanMenu);
-      try {
-        localStorage.setItem(cacheKey, cleanMenu);
-      } catch {}
-    })
-    .catch(() => {});
+    const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${NEIS_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_CODE}&SD_SCHUL_CODE=${SCHUL_CODE}&MMEAL_SC_CODE=2&MLSV_YMD=${ymd}`;
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (reqId !== lunchReqId) return;
+        const rows = data?.mealServiceDietInfo?.[1]?.row;
+        if (!rows || !rows.length) {
+          render('');
+          return;
+        }
+        const cleanMenu = rows[0].DDISH_NM
+          .replace(/<br\s*\/?>/gi, ', ')
+          .replace(/\([0-9.]+\)/g, '')
+          .replace(/\s+/g, ' ')
+          .replace(/\s+,/g, ',')
+          .trim();
+
+        render(cleanMenu);
+        try {
+          localStorage.setItem(cacheKey, cleanMenu);
+        } catch {}
+      })
+      .catch(() => {
+        if (reqId === lunchReqId) render('');
+      });
+  }
+
+  // 중식 박스 좌우 스와이프 (왼쪽으로 밀면 다음 날, 오른쪽으로 밀면 이전 날)
+  box.style.touchAction = 'pan-y';
+  box.style.userSelect = 'none';
+  box.style.webkitUserSelect = 'none';
+  box.style.cursor = 'grab';
+
+  let swipeStart = null;
+  box.addEventListener('pointerdown', (e) => {
+    if (e.isPrimary && e.button === 0) {
+      swipeStart = { x: e.clientX, y: e.clientY, t: Date.now(), id: e.pointerId };
+    }
+  });
+  box.addEventListener('pointerup', (e) => {
+    if (!swipeStart || swipeStart.id !== e.pointerId) return;
+    const dx = e.clientX - swipeStart.x;
+    const dy = e.clientY - swipeStart.y;
+    const elapsed = Date.now() - swipeStart.t;
+    swipeStart = null;
+
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2 && elapsed < 1500) {
+      const nextOffset = Math.max(0, lunchOffset + (dx < 0 ? 1 : -1));
+      if (nextOffset !== lunchOffset) {
+        lunchOffset = nextOffset;
+        loadLunch(lunchOffset);
+      }
+    }
+  });
+  box.addEventListener('pointercancel', () => { swipeStart = null; });
+
+  // 새로고침 버튼 클릭 시 오늘 중식으로 초기화
+  const refreshBtn = document.getElementById('refresh');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      lunchOffset = 0;
+      loadLunch(0);
+    });
+  }
+
+  loadLunch(0);
 })();
