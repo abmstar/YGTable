@@ -50,8 +50,7 @@
         cursor: pointer;
         border: 1px solid var(--line);
         background: white;
-        border-radius: 12px;
-        padding: 11px 15px;
+        border-radius: 10px;
         color: var(--ink);
       }
 
@@ -75,10 +74,25 @@
       input {
         min-width: 0;
         border: 1px solid var(--line);
-        border-radius: 12px;
-        padding: 12px;
+        border-radius: 10px;
         background: white;
         color: var(--ink);
+      }
+
+      /* 모든 입력창과 버튼 높이·크기 완전 통일 (34px) */
+      .controls input,
+      .controls button,
+      .nav button,
+      .all-class-tabs button,
+      #install {
+        height: 34px;
+        padding: 0 12px;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        box-sizing: border-box;
       }
 
       .shell {
@@ -107,7 +121,6 @@
         font-weight: 750;
       }
 
-      /* 제목 오른쪽에 문구를 배치하고 아래쪽 정렬 */
       .title-row {
         display: flex;
         align-items: flex-end;
@@ -141,24 +154,13 @@
         word-break: keep-all;
       }
 
-      /* 교사명 입력, 조회, 새로고침 높이 통일 */
+      /* 교사명 입력, 조회, 새로고침 */
       .controls {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         flex-wrap: nowrap;
-        margin: 24px 0 18px;
-      }
-
-      .controls input,
-      .controls button {
-        height: 40px;
-        padding: 0 14px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        line-height: 1;
-        box-sizing: border-box;
+        margin: 22px 0 16px;
       }
 
       .controls .grow {
@@ -166,14 +168,14 @@
       }
 
       .teacher-input {
-        width: 180px;
-        padding: 0 12px;
+        width: 170px;
+        padding: 0 11px;
       }
 
-      .icon-btn {
-        width: 40px;
+      .controls .icon-btn {
+        width: 34px;
         padding: 0;
-        font-size: 17px;
+        font-size: 16px;
       }
 
       /* 주간 제목 */
@@ -182,7 +184,7 @@
         justify-content: space-between;
         align-items: center;
         gap: 12px;
-        margin: 22px 0 14px;
+        margin: 18px 0 12px;
       }
 
       .week-heading {
@@ -213,10 +215,10 @@
       /* PC 주간 이동 버튼 */
       .nav {
         display: flex;
-        gap: 7px;
+        gap: 6px;
       }
 
-      /* 시간표 */
+      /* 시간표 (주간·일간 셀 높이 46px / 헤더 30px로 통일) */
       .panel {
         background: #fff;
         border: 1px solid var(--line);
@@ -228,11 +230,11 @@
 
       .table {
         display: grid;
-        grid-template-columns: 46px repeat(5, minmax(0, 1fr));
+        grid-template-columns: 0.65fr repeat(5, minmax(0, 1fr));
       }
 
       .cell {
-        min-height: 54px;
+        min-height: 46px;
         padding: 2px 3px;
         border-right: 1px solid #e7ece7;
         border-bottom: 1px solid #e7ece7;
@@ -253,14 +255,14 @@
       }
 
       .cell.head {
-        min-height: 32px;
+        min-height: 30px;
         padding: 2px 3px;
         font-weight: 700;
         background: #f7f9f5;
       }
 
       .cell.period {
-        font-size: 12px;
+        font-size: 13px;
         color: var(--muted);
         background: #fafbf8;
       }
@@ -278,9 +280,66 @@
         color: #c3cec6;
       }
 
-      /* 오늘의 중식 배너 */
+      /* 오늘 전체 학급 시간표 (1-1반~3-3반 10열: 교시 + 9개 학급) */
+      .all-class-section {
+        margin-top: 22px;
+      }
+
+      .all-class-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .all-class-header h3 {
+        margin: 0;
+        font-size: 18px;
+        color: var(--ink);
+      }
+
+      .all-class-tabs {
+        display: flex;
+        gap: 6px;
+      }
+
+      .all-class-table {
+        display: grid;
+        grid-template-columns: 0.75fr repeat(9, minmax(0, 1fr));
+      }
+
+      .all-class-table .cell {
+        min-height: 46px;
+        padding: 2px 2px;
+        font-size: 13px;
+        border-right: 1px solid #e7ece7;
+      }
+
+      .all-class-table .cell:nth-child(10n) {
+        border-right: 0;
+      }
+
+      /* 학년 구분선 (1-3반 뒤, 2-3반 뒤) */
+      .all-class-table .grade-divider {
+        border-right: 2px solid #9eb8a8;
+      }
+
+      .all-class-table .cell.head {
+        min-height: 30px;
+        font-size: 12px;
+      }
+
+      .all-class-table .date-cell {
+        font-weight: 750;
+        min-height: 36px;
+        background: #eaf2eb;
+        border-right: 0;
+      }
+
+      /* 오늘의 중식 배너 (주간 시간표 바로 아래) */
       .lunch-box {
-        margin-top: 10px;
+        margin: 10px 0 4px;
         padding: 10px 14px;
         background: #ffffff;
         border: 1px solid var(--line);
@@ -317,15 +376,8 @@
       .status {
         color: var(--muted);
         font-size: 12px;
-        min-height: 24px;
-        margin-top: 12px;
-      }
-
-      .hint {
-        text-align: center;
-        font-size: 12px;
-        color: var(--muted);
-        margin-top: 18px;
+        min-height: 20px;
+        margin-top: 8px;
       }
 
       .privacy {
@@ -335,20 +387,18 @@
         margin-top: 24px;
       }
 
-      /* 설치 가능한 경우 app.js에서 표시 */
       #install {
         display: none;
         flex-shrink: 0;
       }
 
-      /* 작은 화면에서는 주간 이동 버튼 숨김 */
       @media (max-width: 768px) {
         .nav {
           display: none;
         }
       }
 
-      /* 휴대전화 */
+      /* 휴대전화 (주간·일간 셀 높이 42px / 헤더 26px로 통일) */
       @media (max-width: 540px) {
         .shell {
           padding: 22px 10px;
@@ -373,14 +423,7 @@
 
         .controls {
           gap: 6px;
-          margin: 18px 0 14px;
-        }
-
-        .controls input,
-        .controls button {
-          height: 36px;
-          padding: 0 12px;
-          font-size: 13px;
+          margin: 16px 0 12px;
         }
 
         .teacher-input {
@@ -388,21 +431,15 @@
           padding: 0 10px;
         }
 
-        .icon-btn {
-          width: 36px;
-          padding: 0;
-          font-size: 16px;
-        }
-
         .cell {
-          min-height: 48px;
+          min-height: 42px;
           padding: 2px;
           font-size: 11px;
           line-height: 1.15;
         }
 
         .cell.head {
-          min-height: 30px;
+          min-height: 26px;
           padding: 2px;
         }
 
@@ -420,6 +457,28 @@
 
         .panel {
           border-radius: 14px;
+        }
+
+        /* 모바일 10열 전체 시간표 가독성 최적화 */
+        .all-class-table {
+          grid-template-columns: 26px repeat(9, minmax(0, 1fr));
+        }
+
+        .all-class-table .cell {
+          min-height: 42px;
+          padding: 2px 1px;
+          font-size: 10px;
+          line-height: 1.12;
+        }
+
+        .all-class-table .cell.head {
+          min-height: 26px;
+          font-size: 10px;
+        }
+
+        .all-class-table .date-cell {
+          font-size: 12px !important;
+          min-height: 32px !important;
         }
 
         .lunch-box {
@@ -497,7 +556,7 @@
         <div id="schedule"></div>
       </section>
 
-      <!-- 오늘의 중식 배너 -->
+      <!-- 날짜 연동 중식 배너 -->
       <div id="lunchBox" class="lunch-box" hidden></div>
 
       <div
@@ -507,9 +566,27 @@
         aria-live="polite"
       ></div>
 
-      <div class="hint">
-        ← 왼쪽으로 밀면 다음 주 · 오른쪽으로 밀면 이전 주 →
-      </div>
+      <!-- 오늘 전체 학급 시간표 (1-1반 ~ 3-3반) -->
+      <section class="all-class-section" aria-label="전체 학급 일간 시간표">
+        <div class="all-class-header">
+          <h3 id="allClassTitle">전체 시간표</h3>
+          <div class="all-class-tabs">
+            <button type="button" id="allTodayBtn" class="primary">오늘</button>
+            <button type="button" id="allNextBtn">다음</button>
+          </div>
+        </div>
+
+        <div id="allClassSurface" class="panel">
+          <div id="allClassSchedule"></div>
+        </div>
+
+        <div
+          id="allClassStatus"
+          class="status"
+          role="status"
+          aria-live="polite"
+        ></div>
+      </section>
 
       <footer class="privacy">
         시간표는 조회 시 원본 시트의 내용을 반영합니다.
