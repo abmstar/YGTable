@@ -280,7 +280,7 @@
         color: #c3cec6;
       }
 
-      /* 오늘 전체 학급 시간표 (1-1반~3-3반 10열: 교시 + 9개 학급) */
+      /* 오늘 전체 학급 시간표 (8열: 학급 + 1~7교시, 9행: 1-1반~3-3반) */
       .all-class-section {
         margin-top: 22px;
       }
@@ -306,7 +306,7 @@
 
       .all-class-table {
         display: grid;
-        grid-template-columns: 0.75fr repeat(9, minmax(0, 1fr));
+        grid-template-columns: 0.85fr repeat(7, minmax(0, 1fr));
       }
 
       .all-class-table .cell {
@@ -316,13 +316,13 @@
         border-right: 1px solid #e7ece7;
       }
 
-      .all-class-table .cell:nth-child(10n) {
+      .all-class-table .cell:nth-child(8n) {
         border-right: 0;
       }
 
-      /* 학년 구분선 (1-3반 뒤, 2-3반 뒤) */
-      .all-class-table .grade-divider {
-        border-right: 2px solid #9eb8a8;
+      /* 학년 구분선 (1-3반 아래, 2-3반 아래) */
+      .all-class-table .grade-row-divider {
+        border-bottom: 2px solid #9eb8a8;
       }
 
       .all-class-table .cell.head {
@@ -459,21 +459,21 @@
           border-radius: 14px;
         }
 
-        /* 모바일 10열 전체 시간표 가독성 최적화 */
+        /* 모바일 8열 전체 시간표 (학급 + 1~7교시) */
         .all-class-table {
-          grid-template-columns: 26px repeat(9, minmax(0, 1fr));
+          grid-template-columns: 38px repeat(7, minmax(0, 1fr));
         }
 
         .all-class-table .cell {
           min-height: 42px;
           padding: 2px 1px;
-          font-size: 10px;
-          line-height: 1.12;
+          font-size: 11px;
+          line-height: 1.15;
         }
 
         .all-class-table .cell.head {
           min-height: 26px;
-          font-size: 10px;
+          font-size: 11px;
         }
 
         .all-class-table .date-cell {
