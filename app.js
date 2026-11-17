@@ -144,13 +144,13 @@ window.addEventListener('pageshow',updateInstallButton);updateInstallButton();
 if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{$('status').textContent+=' · 오프라인 파일 등록 실패';});
 loadWeek();armDateRefresh();
 
-// === 전체 학급 일간 시간표(1-1반~3-3반) + 중식 날짜 동기화 ===
+// === 전체 학급 일간 시간표(행: 1-1~3-3, 열: 1~7교시) + 중식 날짜 동기화 ===
 (function initAllClassAndLunch() {
   const NEIS_KEY = 'd5af74fa74044241a8cf5f076434d1b4';
   const ATPT_CODE = 'J10';
   const SCHUL_CODE = '7530586';
   const ALL_CLASSES = ['1-1반', '1-2반', '1-3반', '2-1반', '2-2반', '2-3반', '3-1반', '3-2반', '3-3반'];
-  const SHORT_HEADERS = ['1-1', '1-2', '1-3', '2-1', '2-2', '2-3', '3-1', '3-2', '3-3'];
+  const SHORT_CLASSES = ['1-1', '1-2', '1-3', '2-1', '2-2', '2-3', '3-1', '3-2', '3-3'];
 
   const scheduleEl = document.getElementById('allClassSchedule');
   const surfaceEl = document.getElementById('allClassSurface');
@@ -248,41 +248,36 @@ loadWeek();armDateRefresh();
       });
   }
 
-  // 1-1반~3-3반 일간 테이블 렌더링
-  function renderAllClassTable(info, record, note) {
+  // 전체 학급 일간 테이블 렌더링 (날짜 행 제거, 첫 행이 학급 | 1~7교시 헤더)
+  function renderAllClassTable(info, record) {
     const grid = document.createElement('div');
     grid.className = 'all-class-table';
     grid.setAttribute('role', 'table');
-    grid.setAttribute('aria-label', `일간 ${info.label} 시간표`);
+    grid.setAttribute('aria-label', `일간 ${info.label} 전체 학급 시간표`);
 
-    function cell(text, cls = '', span = 1, role = 'cell') {
+    function cell(text, cls = '', role = 'cell') {
       const el = document.createElement('div');
       el.className = 'cell ' + cls;
       el.textContent = text;
       el.setAttribute('role', role);
-      if (span > 1) el.style.gridColumn = `span ${span}`;
       grid.append(el);
     }
 
-    // 1행: 날짜 제목 (10열 전체 병합)
-    cell(info.label + (note ? ' · ' + note : ''), 'head date-cell', 10, 'columnheader');
-
-    // 2행: 교시 | 1-1 ~ 3-3
-    cell('교시', 'head', 1, 'columnheader');
-    SHORT_HEADERS.forEach((h, idx) => {
-      const divCls = (idx === 2 || idx === 5) ? ' grade-divider' : '';
-      cell(h, 'head' + divCls, 1, 'columnheader');
-    });
-
-    // 3~9행: 1교시 ~ 7교시
-    for (let r = 0; r < 7; r++) {
-      cell(`${r + 1}`, 'period', 1, 'rowheader');
-      SHORT_HEADERS.forEach((_, idx) => {
-        const divCls = (idx === 2 || idx === 5) ? ' grade-divider' : '';
-        const val = record ? record.schedules[idx][r][info.day - 1] : '';
-        cell(val || '—', (!val ? 'empty-cell' : '') + divCls);
-      });
+    // 1행(헤더): 학급 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+    cell('학급', 'head', 'columnheader');
+    for (let p = 1; p <= 7; p++) {
+      cell(`${p}`, 'head', 'columnheader');
     }
+
+    // 2~10행: 1-1반 ~ 3-3반 (행) × 1~7교시 (열)
+    SHORT_CLASSES.forEach((clsName, cIdx) => {
+      const divCls = (cIdx === 2 || cIdx === 5) ? ' grade-row-divider' : '';
+      cell(clsName, 'period' + divCls, 'rowheader');
+      for (let p = 0; p < 7; p++) {
+        const val = record ? record.schedules[cIdx][p][info.day - 1] : '';
+        cell(val || '—', (!val ? 'empty-cell' : '') + divCls);
+      }
+    });
 
     scheduleEl.replaceChildren(grid);
   }
@@ -291,7 +286,7 @@ loadWeek();armDateRefresh();
     const token = ++allReqId;
     const info = schoolDateInfo(dayOffset);
 
-    if (titleEl) titleEl.textContent = `${info.label} · 시간표`;
+    if (titleEl) titleEl.textContent = `${info.label} · 전체 시간표`;
     if (todayBtn) todayBtn.classList.toggle('primary', dayOffset === 0);
 
     // 날짜 이동 시 중식도 함께 동기화
@@ -307,14 +302,14 @@ loadWeek();armDateRefresh();
       }
     } catch {}
 
-    renderAllClassTable(info, record, !record ? (navigator.onLine ? '조회 중…' : '저장본 없음') : '');
+    renderAllClassTable(info, record);
 
     if (!navigator.onLine) {
       if (statusEl) statusEl.textContent = '오프라인 · 저장된 전체 시간표만 표시합니다.';
       return;
     }
 
-    if (statusEl) statusEl.textContent = '전체 학급 시간표 확인 중…';
+    if (statusEl) statusEl.textContent = !record ? '전체 학급 시간표 불러오는 중…' : '전체 학급 시간표 확인 중…';
 
     try {
       const responses = await Promise.all(
@@ -325,8 +320,9 @@ loadWeek();armDateRefresh();
       const values = responses.map(r => r.data);
       if (values.some(v => !v || (!v.ok && v.code === 'SHEET_NOT_FOUND'))) {
         try { localStorage.removeItem(PREFIX + cacheKey); } catch {}
-        renderAllClassTable(info, null, '해당 주 시간표 없음');
-        if (statusEl) statusEl.textContent = `${sheet} 시트 미등록`;
+        renderAllClassTable(info, null);
+        if (titleEl) titleEl.textContent = `${info.label} · 전체 시간표 (미등록)`;
+        if (statusEl) statusEl.textContent = `${sheet} 시트가 아직 등록되지 않았습니다.`;
         return;
       }
 
@@ -340,11 +336,11 @@ loadWeek();armDateRefresh();
         fetchedAt: new Date().toISOString()
       };
       store.set(cacheKey, JSON.stringify(record));
-      renderAllClassTable(info, record, '');
-      if (statusEl) statusEl.textContent = `시간표 갱신 ${stamp(record.fetchedAt)} \u2003 ← 다음 날 · 이전 날 →`;
+      renderAllClassTable(info, record);
+      if (statusEl) statusEl.textContent = `전체 학급 갱신 ${stamp(record.fetchedAt)} \u2003 ← 다음 날 · 이전 날 →`;
     } catch (error) {
       if (token !== allReqId) return;
-      renderAllClassTable(info, record, record ? '저장본' : '조회 실패');
+      renderAllClassTable(info, record);
       if (statusEl) statusEl.textContent = `${sheet}: ${error.message}`;
     }
   }
